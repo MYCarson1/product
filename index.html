@@ -3,15 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nexus Price System (Standalone)</title>
+    <title>MINDYN Price System (Standalone)</title>
     
-    <!-- 1. 引入核心库 (React, Tailwind, Excel处理, 图标库) -->
+    <!-- 引入核心库: Tailwind CSS, React, Babel, Excel处理库 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
 
     <!-- 字体配置 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -57,11 +56,11 @@
 <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "xlsx": "https://esm.sh/xlsx@^0.18.5"
+    "xlsx": "https://esm.sh/xlsx@^0.18.5",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
   }
 }
 </script>
@@ -70,23 +69,45 @@
     <div id="root">
       <div class="loading-container">
         <div class="animate-pulse text-xl tracking-[0.3em]">INITIALIZING SYSTEM...</div>
-        <div class="text-xs text-slate-500 mt-4">NEXUS V1.3 STANDALONE</div>
+        <div class="text-xs text-slate-500 mt-4">MINDYN V1.4 SECURE</div>
       </div>
     </div>
 
-    <!-- 2. 应用程序逻辑 (Babel 编译) -->
     <script type="text/babel">
       const { useState, useEffect, useRef } = React;
-      
-      // 获取 Lucide 图标
-      const { 
-        LayoutGrid, Database, Zap, Search, PlusCircle, Settings,
-        Upload, FileSpreadsheet, Loader2, X, ChevronRight,
-        Tag, Truck, AlertCircle, DollarSign, Clock, Briefcase, 
-        Link: LinkIcon, BoxSelect, Trash2, Image, Edit, Edit2, Plus, Save
-      } = lucideReact;
 
-      // --- 服务层: Excel 解析 ---
+      // --- 1. 内置图标组件 (解决 lucideReact is not defined 问题) ---
+      const Icon = ({ children, className, ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
+      );
+      
+      const Zap = (p) => <Icon {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>;
+      const Database = (p) => <Icon {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></Icon>;
+      const Search = (p) => <Icon {...p}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></Icon>;
+      const LayoutGrid = (p) => <Icon {...p}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></Icon>;
+      const PlusCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></Icon>;
+      const Settings = (p) => <Icon {...p}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.39a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></Icon>;
+      const Upload = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></Icon>;
+      const FileSpreadsheet = (p) => <Icon {...p}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></Icon>;
+      const Loader2 = (p) => <Icon {...p}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></Icon>;
+      const X = (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>;
+      const ChevronRight = (p) => <Icon {...p}><path d="m9 18 6-6-6-6"/></Icon>;
+      const Tag = (p) => <Icon {...p}><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></Icon>;
+      const Truck = (p) => <Icon {...p}><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/><path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><path d="M15 18H9"/><circle cx="17" cy="18" r="2"/></Icon>;
+      const AlertCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></Icon>;
+      const DollarSign = (p) => <Icon {...p}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></Icon>;
+      const Clock = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
+      const Briefcase = (p) => <Icon {...p}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></Icon>;
+      const LinkIcon = (p) => <Icon {...p}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></Icon>;
+      const BoxSelect = (p) => <Icon {...p}><path d="M5 3a2 2 0 0 0-2 2"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M9 3h1"/><path d="M9 21h1"/><path d="M14 3h1"/><path d="M14 21h1"/><path d="M3 9v1"/><path d="M21 9v1"/><path d="M3 14v1"/><path d="M21 14v1"/></Icon>;
+      const Trash2 = (p) => <Icon {...p}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
+      const Image = (p) => <Icon {...p}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></Icon>;
+      const Edit = (p) => <Icon {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></Icon>;
+      const Edit2 = (p) => <Icon {...p}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></Icon>;
+      const Plus = (p) => <Icon {...p}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>;
+      const Save = (p) => <Icon {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></Icon>;
+
+      // --- 2. 服务层: Excel 解析 ---
       const parseExcelFile = (file) => {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -121,7 +142,7 @@
         });
       };
 
-      // --- 组件: FileUpload ---
+      // --- 3. 组件: FileUpload ---
       const FileUpload = ({ onDataLoaded }) => {
         const fileInputRef = useRef(null);
         const [isDragging, setIsDragging] = useState(false);
@@ -193,7 +214,7 @@
         );
       };
 
-      // --- 组件: SearchBar ---
+      // --- 4. 组件: SearchBar ---
       const SearchBar = ({ products, onProductSelect }) => {
         const [query, setQuery] = useState('');
         const [results, setResults] = useState([]);
@@ -276,7 +297,7 @@
         );
       };
 
-      // --- 组件: ProductDetail ---
+      // --- 5. 组件: ProductDetail ---
       const ProductDetail = ({ product }) => {
         return (
           <div className="w-full max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
@@ -372,7 +393,7 @@
         );
       };
 
-      // --- 组件: ProductForm ---
+      // --- 6. 组件: ProductForm ---
       const ProductForm = ({ initialData, onSave, onCancel }) => {
         const [formData, setFormData] = useState({
           id: Date.now().toString().slice(-6), name: '', price: '', rentalPrice: '', shippingList: '',
@@ -437,7 +458,7 @@
         );
       };
 
-      // --- 组件: ProductList ---
+      // --- 7. 组件: ProductList ---
       const ProductList = ({ products, onDelete, onEdit }) => {
         if (products.length === 0) return null;
         return (
@@ -474,7 +495,7 @@
         );
       };
 
-      // --- 主应用: App ---
+      // --- 8. 主应用: App ---
       const App = () => {
         const [products, setProducts] = useState([]);
         const [selectedProduct, setSelectedProduct] = useState(null);
@@ -528,7 +549,7 @@
               <header className="w-full max-w-6xl flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-tech-accent rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]"><Zap className="text-slate-900 w-6 h-6 fill-current" /></div>
-                  <div><h1 className="text-2xl font-bold tracking-tight text-white">NEXUS</h1><p className="text-[10px] font-mono text-tech-accent tracking-[0.2em] uppercase">智能价格查询系统</p></div>
+                  <div><h1 className="text-2xl font-bold tracking-tight text-white">MINDYN</h1><p className="text-[10px] font-mono text-tech-accent tracking-[0.2em] uppercase">智能价格查询系统</p></div>
                 </div>
                 <div className="flex items-center space-x-4">
                    {dataLoaded && <div className="hidden md:flex items-center px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700"><Database className="w-4 h-4 text-emerald-400 mr-2" /><span className="text-xs font-mono text-slate-300">数据库: {products.length} 条记录</span></div>}
@@ -566,13 +587,12 @@
                   </div>
                 )}
               </main>
-              <footer className="w-full text-center py-8 text-slate-600 text-xs font-mono mt-auto"><p>NEXUS SYSTEMS V1.3 // CN_LOCALE // SECURE</p></footer>
+              <footer className="w-full text-center py-8 text-slate-600 text-xs font-mono mt-auto"><p>MINDYN SYSTEMS V1.4 // CN_LOCALE // SECURE</p></footer>
             </div>
           </div>
         );
       };
 
-      // 启动应用
       const root = ReactDOM.createRoot(document.getElementById('root'));
       root.render(<App />);
     </script>
